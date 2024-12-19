@@ -17,8 +17,14 @@
  * - Отображать состояние парка
  */
 
-// Базовый класс Vehicle
-open class Vehicle(val make: String, val model: String, val year: Int) {
+// Перечисление для типа велосипеда
+enum class BicycleType(val typeName: String) {
+    MOUNTAIN("Горный"),
+    ROAD("Шоссейный")
+}
+
+// Класс Vehicle (Транспортное средство)
+open class Vehicle(val make: String, val model: String, private val year: Int) {
 
     // Метод для запуска транспортного средства
     open fun start() {
@@ -37,7 +43,7 @@ open class Vehicle(val make: String, val model: String, val year: Int) {
 }
 
 // Класс Car (Автомобиль)
-class Car(make: String, model: String, year: Int, val numberOfDoors: Int, val fuelType: String) : Vehicle(make, model, year) {
+class Car(make: String, model: String, year: Int, private val numberOfDoors: Int, private val fuelType: String) : Vehicle(make, model, year) {
 
     // Переопределение метода для запуска автомобиля
     override fun start() {
@@ -57,7 +63,7 @@ class Car(make: String, model: String, year: Int, val numberOfDoors: Int, val fu
 }
 
 // Класс Bicycle (Велосипед)
-class Bicycle(make: String, model: String, year: Int, val type: String, val hasBell: Boolean) : Vehicle(make, model, year) {
+class Bicycle(make: String, model: String, year: Int, private val type: BicycleType, private val hasBell: Boolean) : Vehicle(make, model, year) {
 
     // Переопределение метода для запуска велосипеда
     override fun start() {
@@ -72,12 +78,12 @@ class Bicycle(make: String, model: String, year: Int, val type: String, val hasB
     // Переопределение метода для отображения информации о велосипеде
     override fun displayInfo() {
         super.displayInfo()
-        println("Тип: $type, Есть звонок: $hasBell")
+        println("Тип: ${type.typeName}, Есть звонок: $hasBell")
     }
 }
 
 // Класс Bus (Автобус)
-class Bus(make: String, model: String, year: Int, val capacity: Int, val routeNumber: String) : Vehicle(make, model, year) {
+class Bus(make: String, model: String, year: Int, private val capacity: Int, val routeNumber: String) : Vehicle(make, model, year) {
 
     // Переопределение метода для запуска автобуса
     override fun start() {
@@ -108,7 +114,7 @@ class FleetManager {
 
     // Метод для планирования обслуживания всех транспортных средств
     fun planMaintenance() {
-        println("Планирование обслуживания для всех транспортных средств в парке.")
+        println("\nПланирование обслуживания для всех транспортных средств в парке.")
         for (vehicle in fleet) {
             println("Запланировано обслуживание для ${vehicle.make} ${vehicle.model}")
         }
@@ -116,25 +122,24 @@ class FleetManager {
 
     // Метод для назначения автобуса на маршрут
     fun assignVehicleToRoute(vehicle: Bus) {
-        println("Назначение автобуса ${vehicle.make} ${vehicle.model} на маршрут ${vehicle.routeNumber}")
+        println("\nНазначение автобуса ${vehicle.make} ${vehicle.model} на маршрут ${vehicle.routeNumber}")
     }
 
     // Метод для отображения состояния всего парка
     fun displayFleetStatus() {
-        println("Состояние парка:")
+        println("\nСостояние парка:")
         for (vehicle in fleet) {
             vehicle.displayInfo()
         }
     }
 }
 
-// Консольное приложение
 fun main() {
     val fleetManager = FleetManager() // Создание менеджера парка
 
     // Регистрируем транспортные средства
     val car = Car("Toyota", "Camry", 2020, 4, "Бензин")
-    val bicycle = Bicycle("Giant", "XTC", 2022, "Горный", true)
+    val bicycle = Bicycle("Giant", "XTC", 2022, BicycleType.MOUNTAIN, true)
     val bus = Bus("Mercedes", "Sprinter", 2018, 50, "101")
 
     fleetManager.registerVehicle(car)
