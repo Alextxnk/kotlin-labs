@@ -1,4 +1,5 @@
 import java.time.LocalDate
+import java.util.*
 
 /**
  * 6 вариант
@@ -50,13 +51,13 @@ data class City(
     // Функция для поиска экстремальных температур
     fun extremeTemperatures(): Pair<Double?, Double?> {
         return weatherRecords.map { it.temperature }
-            .let { temperatures -> temperatures.minOrNull() to temperatures.maxOrNull() }
+            .let { it.minOrNull() to it.maxOrNull() }
     }
 
     // Функция для поиска экстремальных осадков
     fun extremePrecipitation(): Pair<Double?, Double?> {
         return weatherRecords.map { it.precipitation }
-            .let { precipitations -> precipitations.minOrNull() to precipitations.maxOrNull() }
+            .let { it.minOrNull() to it.maxOrNull() }
     }
 
     // Функция для сравнения погодных условий между двумя городами
@@ -65,9 +66,9 @@ data class City(
         val avgTempOtherCity = otherCity.averageTemperature()
 
         return when {
-            avgTempThisCity > avgTempOtherCity -> "${this.name} теплее, чем ${otherCity.name}."
-            avgTempThisCity < avgTempOtherCity -> "${this.name} холоднее, чем ${otherCity.name}."
-            else -> "${this.name} и ${otherCity.name} имеют одинаковую среднюю температуру."
+            avgTempThisCity > avgTempOtherCity -> "${this.name} теплее, чем ${otherCity.name}"
+            avgTempThisCity < avgTempOtherCity -> "${this.name} холоднее, чем ${otherCity.name}"
+            else -> "${this.name} и ${otherCity.name} имеют одинаковую среднюю температуру"
         }
     }
 }
@@ -80,42 +81,54 @@ fun collectWeatherData(city: City, record: WeatherRecord) {
 // Функция для анализа тенденций, например, выявление повышения или понижения температуры
 fun analyzeTemperatureTrends(city: City): String {
     return city.weatherRecords.map { it.temperature }
-        .let { temperatures ->
+        .zipWithNext { a, b -> b - a }  // Список разниц температур между соседними днями
+        .let { temperatureChanges ->  // Внутри let доступен список разниц температур
             when {
-                temperatures.all { it > temperatures.first() } -> "Температура растет."
-                temperatures.all { it < temperatures.first() } -> "Температура падает."
-                else -> "Температура колеблется."
+                temperatureChanges.all { it > 0 } -> "Температура в г. ${city.name} растет"
+                temperatureChanges.all { it < 0 } -> "Температура в г. ${city.name} падает"
+                else -> "Температура в г. ${city.name} колеблется"
             }
         }
 }
 
 fun main() {
-    // Создание города и добавление погодных записей
+    // Создание городов и добавление погодных записей
     val city1 = City("Москва", "Россия", Pair(55.7558, 37.6173))
     collectWeatherData(city1, WeatherRecord(LocalDate.of(2024, 12, 1), -5.0, 80.0, 0.0))
     collectWeatherData(city1, WeatherRecord(LocalDate.of(2024, 12, 2), -3.0, 85.0, 1.0))
     collectWeatherData(city1, WeatherRecord(LocalDate.of(2024, 12, 3), 0.0, 75.0, 0.0))
 
     val city2 = City("Санкт-Петербург", "Россия", Pair(59.9343, 30.3351))
-    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 1), -3.0, 78.0, 0.0))
-    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 2), -2.0, 80.0, 0.5))
-    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 3), 1.0, 70.0, 0.0))
+    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 1), 1.0, 78.0, 0.0))
+    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 2), 0.0, 80.0, 0.5))
+    collectWeatherData(city2, WeatherRecord(LocalDate.of(2024, 12, 3), -2.0, 70.0, 0.0))
 
-    // Анализ тенденций
+    // Анализ температурных тенденций
     println(analyzeTemperatureTrends(city1))
+    println(analyzeTemperatureTrends(city2))
 
     // Сравнение температуры между городами
     println(city1.compareWeatherWith(city2))
 
-    // Вывод средней температуры и осадков для города
-    println("Средняя температура в г. ${city1.name}: ${city1.averageTemperature()}")
-
-    println("Средние осадки в г. ${city1.name}: ${city1.averagePrecipitation()}")
+    // Вывод средних значений температуры и осадков для города Москва
+    println("\nСредняя температура в г. ${city1.name}: ${String.format(Locale.US, "%.2f", city1.averageTemperature())}")
+    println("Средние осадки в г. ${city1.name}: ${String.format(Locale.US, "%.2f", city1.averagePrecipitation())}")
 
     // Поиск экстремальных температур и осадков
-    val extremeTemps = city1.extremeTemperatures()
-    println("Экстремальные температуры в г. ${city1.name}: ${extremeTemps.first} до ${extremeTemps.second}")
+    val extremeTempsCity1 = city1.extremeTemperatures()
+    println("Экстремальные температуры в г. ${city1.name}: ${extremeTempsCity1.first} до ${extremeTempsCity1.second}")
 
-    val extremePrecip = city1.extremePrecipitation()
-    println("Экстремальные осадки в г. ${city1.name}: ${extremePrecip.first} до ${extremePrecip.second}")
+    val extremePrecipCity1 = city1.extremePrecipitation()
+    println("Экстремальные осадки в г. ${city1.name}: ${extremePrecipCity1.first} до ${extremePrecipCity1.second}")
+
+    // Вывод средних значений температуры и осадков для города Санкт-Петербург
+    println("\nСредняя температура в г. ${city2.name}: ${String.format(Locale.US, "%.2f", city2.averageTemperature())}")
+    println("Средние осадки в г. ${city2.name}: ${String.format(Locale.US, "%.2f", city2.averagePrecipitation())}")
+
+    // Поиск экстремальных температур и осадков
+    val extremeTempsCity2 = city2.extremeTemperatures()
+    println("Экстремальные температуры в г. ${city2.name}: ${extremeTempsCity2.first} до ${extremeTempsCity2.second}")
+
+    val extremePrecipCity2 = city2.extremePrecipitation()
+    println("Экстремальные осадки в г. ${city2.name}: ${extremePrecipCity2.first} до ${extremePrecipCity2.second}")
 }
