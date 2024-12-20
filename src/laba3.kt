@@ -74,14 +74,14 @@ data class City(
 
     // Функция для сравнения погодных условий между двумя городами
     fun compareWeatherWith(otherCity: City): String {
-        val avgTempThisCity = averageTemperature() // Средняя температура текущего города
-        val avgTempOtherCity = otherCity.averageTemperature() // Средняя температура другого города
-
-        return when {
-            avgTempThisCity > avgTempOtherCity -> "${this.name} теплее, чем ${otherCity.name}"
-            avgTempThisCity < avgTempOtherCity -> "${this.name} холоднее, чем ${otherCity.name}"
-            else -> "${this.name} и ${otherCity.name} имеют одинаковую среднюю температуру"
-        }
+        return listOf(averageTemperature() to otherCity.averageTemperature())  // Создаем список с парой средних температур
+            .let {
+                when {
+                    it[0].first > it[0].second -> "${this.name} теплее, чем ${otherCity.name}"
+                    it[0].first < it[0].second -> "${this.name} холоднее, чем ${otherCity.name}"
+                    else -> "${this.name} и ${otherCity.name} имеют одинаковую среднюю температуру"
+                }
+            }
     }
 }
 
